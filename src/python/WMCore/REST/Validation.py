@@ -1,6 +1,6 @@
 from WMCore.REST.Error import *
 import math, re
-
+import numbers 
 def _arglist(argname, kwargs):
     val = kwargs.get(argname, None)
     if val == None:
@@ -33,7 +33,7 @@ def _check_ustr(argname, val, rx):
     return val
 
 def _check_num(argname, val, bare, minval, maxval):
-    if not isinstance(val, int) and (not isinstance(val, str) or (bare and not val.isdigit())):
+    if not isinstance(val, numbers.Integral) and (not isinstance(val, str) or (bare and not val.isdigit())):
         raise InvalidParameter("Incorrect '%s' parameter" % argname)
     try:
         n = int(val)
@@ -46,7 +46,7 @@ def _check_num(argname, val, bare, minval, maxval):
         raise InvalidParameter("Invalid '%s' parameter" % argname)
 
 def _check_real(argname, val, special, minval, maxval):
-    if not isinstance(val, float) and not isinstance(val, str):
+    if not isinstance(val, numbers.Number) and not isinstance(val, str):
         raise InvalidParameter("Incorrect '%s' parameter" % argname)
     try:
         n = float(val)
