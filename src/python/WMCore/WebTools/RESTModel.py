@@ -170,6 +170,17 @@ class RESTModel(WebAPI):
             self.methods[verb] = {}
         @wraps(function)
         def wrapper(*input_args, **input_kwargs):
+            request = cherrypy.request
+            msg = 'REQUEST {} {} {} {} [{}] [{}] [{}]'.format(\
+                    request.remote.ip,
+                    request.remote.port,
+                    request.method,
+                    request.path_info,
+                    request.headers,
+                    request.query_string,
+                    request.params
+                    )
+            cherrypy.log.access_log.info(msg)
             if secured:
                 # set up security
                 security = cherrypy.tools.secmodv2
