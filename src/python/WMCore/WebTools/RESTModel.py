@@ -160,7 +160,7 @@ class RESTModel(WebAPI):
 
     def _addMethod(self, verb, methodKey, function, args=[],
                   validation=[], version=1, expires = None,
-                  secured=False, security_params={}):
+                  secured=False, security_params={}, dump_request_info=False):
         """
         Add a method handler to self.methods self.methods, decorate it such that it
         receives sanitised input and is marked as 'restexposed'.
@@ -170,6 +170,27 @@ class RESTModel(WebAPI):
             self.methods[verb] = {}
         @wraps(function)
         def wrapper(*input_args, **input_kwargs):
+            if dump_request_info:
+                request = cherrypy.request
+                headers = request.headers
+                skip = ['cookie', 'cms-authn-hmac', 'ssl-client-cert', 'cms-authz-admin']
+                for key in headers.keys():
+                    if key.lower().startswith('ssl-'):
+                        del headers[key]
+                    if key.lower() in skip:
+                        del headers[key]
+                tst = time.gmtime(time.time())
+                msg = 'REQUEST {} {} {} {} {} [{}] [{}] [{}]'.format(\
+                        time.strftime('[%d/%b/%Y %H:%M:%S GMT]', tst),
+                        request.remote.ip,
+                        request.remote.port,
+                        request.method,
+                        request.path_info,
+                        headers,
+                        request.query_string,
+                        request.params
+                        )
+                cherrypy.log.access_log.info(msg)
             if secured:
                 # set up security
                 security = cherrypy.tools.secmodv2
